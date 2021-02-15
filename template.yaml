@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Take regular screenshots of a website and store in an S3 bucket. 
+  
+Resources:
+  # Define an S3 bucket
+  S3Bucket:
+    Type: AWS::S3::Bucket  
+
+  # Define the consumer Lambda function and EventBridge rule
+  SnapshotFunction:
+    Type: AWS::Serverless::Function
+    Description: Invoked by EventBridge scheduled rule
+    Properties:
+      CodeUri: src/
+      Handler: app.handler
+      Runtime: nodejs12.x
+      Timeout: 15
+      MemorySize: 4096
+      Layers:
+        - !Sub 'arn:aws:lambda:${AWS::Region}:764866452798:layer:chrome-aws-lambda:22'
+      Environment:
+        Variables:
+          TARGET_URL: 'https://serverlessland.com'
+          S3_BUCKET: !Ref S3Bucket
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref S3Bucket
+
+      Events:
+        CheckWebsiteScheduledEvent:
+          Type: Schedule
+          Properties:
+            Schedule: rate(15 minutes)
+
+Outputs:
+  ConsumerFunction:
+    Description: SnapshotFunction function name
+    Value: !Ref SnapshotFunction
