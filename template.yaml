@@ -16,7 +16,7 @@ Resources:
       Handler: app.handler
       Runtime: nodejs12.x
       Timeout: 15
-      MemorySize: 4096
+      MemorySize: 3000
       Layers:
         - !Sub 'arn:aws:lambda:${AWS::Region}:764866452798:layer:chrome-aws-lambda:22'
       Environment:
